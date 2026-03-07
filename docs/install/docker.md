@@ -74,12 +74,32 @@ Optional env vars:
   flows require them (default keeps extensions disabled in sandbox browser).
 - `OPENCLAW_BROWSER_RENDERER_PROCESS_LIMIT=<N>` — set Chromium renderer process
   limit; set to `0` to skip the flag and use Chromium default behavior.
+- `OPENCLAW_INSTALL_AGENT_BROWSER` — build arg passthrough for local image builds (`1` installs agent-browser for AI-driven browser automation). Adds ~500MB to image size.
 
 After it finishes:
 
 - Open `http://127.0.0.1:18789/` in your browser.
 - Paste the token into the Control UI (Settings → token).
 - Need the URL again? Run `docker compose run --rm openclaw-cli dashboard --no-open`.
+
+### Enable agent-browser (opt-in)
+
+To enable AI-driven browser automation for agents and skills:
+
+```bash
+export OPENCLAW_INSTALL_AGENT_BROWSER=1
+./docker-setup.sh
+```
+
+This installs [agent-browser](https://github.com/vercel-labs/agent-browser) globally in the container and downloads browser binaries (~500MB). Agents and skills can then use `agent-browser` to navigate pages, take screenshots, fill forms, and extract content.
+
+Verify installation:
+
+```bash
+docker compose run --rm openclaw-cli sh -c 'agent-browser --version'
+```
+
+**Note:** Browser binaries are cached at `/home/node/.cache`. Use `OPENCLAW_HOME_VOLUME` to persist them across container recreations and avoid re-downloading on every rebuild.
 
 ### Enable agent sandbox for Docker gateway (opt-in)
 
