@@ -32,6 +32,9 @@ RUN if [ -n "$OPENCLAW_DOCKER_APT_PACKAGES" ]; then \
 
 COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY --chown=node:node ui/package.json ./ui/package.json
+COPY --chown=node:node packages/clawdbot/package.json ./packages/clawdbot/package.json
+COPY --chown=node:node packages/moltbot/package.json ./packages/moltbot/package.json
+COPY --chown=node:node extensions/feishu/package.json ./extensions/feishu/package.json
 COPY --chown=node:node patches ./patches
 COPY --chown=node:node scripts ./scripts
 
