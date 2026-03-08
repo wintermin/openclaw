@@ -30,9 +30,11 @@ RUN if [ -n "$OPENCLAW_DOCKER_APT_PACKAGES" ]; then \
       rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*; \
     fi
 
-# Install edge-tts for TTS voice replies (free, no API key needed).
-# Uses Microsoft Edge's speech service; supports zh-CN voices out of the box.
-RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3 - --break-system-packages --quiet && \
+# Install ffmpeg (audio conversion for whisper-cli ASR) and edge-tts (TTS voice replies).
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ffmpeg && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
+    curl -sS https://bootstrap.pypa.io/get-pip.py | python3 - --break-system-packages --quiet && \
     pip install edge-tts --break-system-packages --quiet --root-user-action=ignore
 
 # Install DashScope ASR whisper-cli wrapper (mimics whisper-cli interface, routes to sensevoice-v1).

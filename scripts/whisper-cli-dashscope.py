@@ -24,26 +24,46 @@ def get_api_key():
     return os.environ.get("DASHSCOPE_API_KEY", "")
 
 
-def audio_to_wav_base64(path):
-    """Convert any audio file to 16kHz mono WAV and return base64 string."""
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as t:
-        wav_path = t.name
-    try:
-        result = subprocess.run(
-            ["ffmpeg", "-i", path, "-ar", "16000", "-ac", "1", "-f", "wav", "-y", wav_path],
-            capture_output=True, timeout=30
-        )
-        if result.returncode != 0:
-            log(f"ffmpeg error: {result.stderr.decode()[:200]}")
-            return None
-        with open(wav_path, "rb") as f:
-            data = f.read()
-        return base64.b64encode(data).decode()
-    finally:
+def get_audio_base64(path):
+    """Convert audio to WAV via ffmpeg if available, otherwise send original file directly.
+    DashScope sensevoice-v1 accepts wav/mp3/ogg/m4a natively."""
+    import mimetypes
+
+    # Try ffmpeg conversion first (best quality, ensures 16kHz mono WAV)
+    ffmpeg_bin = None
+    for candidate in ["ffmpeg", "/usr/local/bin/ffmpeg", "/usr/bin/ffmpeg"]:
+        if subprocess.run(["which", candidate], capture_output=True).returncode == 0:
+            ffmpeg_bin = candidate
+            break
+
+    if ffmpeg_bin:
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as t:
+            wav_path = t.name
         try:
-            os.unlink(wav_path)
-        except Exception:
-            pass
+            result = subprocess.run(
+                [ffmpeg_bin, "-i", path, "-ar", "16000", "-ac", "1", "-f", "wav", "-y", wav_path],
+                capture_output=True, timeout=30
+            )
+            if result.returncode == 0:
+                with open(wav_path, "rb") as f:
+                    data = f.read()
+                return base64.b64encode(data).decode(), "audio/wav"
+            log(f"ffmpeg error: {result.stderr.decode()[:200]}")
+        finally:
+            try:
+                os.unlink(wav_path)
+            except Exception:
+                pass
+
+    # Fallback: send original file directly (DashScope accepts ogg/mp3/m4a/wav)
+    log("ffmpeg not available, sending original audio directly")
+    ext = os.path.splitext(path)[-1].lower().lstrip(".")
+    mime_map = {"ogg": "audio/ogg", "mp3": "audio/mpeg", "m4a": "audio/mp4",
+                "wav": "audio/wav", "flac": "audio/flac", "webm": "audio/webm"}
+    mime = mime_map.get(ext, "audio/ogg")
+    with open(path, "rb") as f:
+        data = f.read()
+    return base64.b64encode(data).decode(), mime
 
 
 def transcribe(audio_path, language="zh"):
@@ -53,13 +73,13 @@ def transcribe(audio_path, language="zh"):
         return None
 
     log(f"Converting audio: {audio_path}")
-    b64 = audio_to_wav_base64(audio_path)
+    b64, mime = get_audio_base64(audio_path)
     if not b64:
-        log("Audio conversion failed")
+        log("Audio read failed")
         return None
 
-    data_url = f"data:audio/wav;base64,{b64}"
-    log(f"Submitting {len(b64)} chars to sensevoice-v1")
+    data_url = f"data:{mime};base64,{b64}"
+    log(f"Submitting {len(b64)} chars ({mime}) to sensevoice-v1")
 
     body = json.dumps({
         "model": "sensevoice-v1",
