@@ -11,6 +11,8 @@ services:
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
+      WHISPER_CPP_MODEL: /home/node/dashscope-model.bin
+      PATH: /home/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     volumes:
       - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
       - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
@@ -50,6 +52,27 @@ services:
       retries: 5
       start_period: 20s
 
+  context-manager:
+    image: ${OPENCLAW_IMAGE:-openclaw:local}
+    environment:
+      HOME: /home/node
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      COMPRESS_THRESHOLD: "60000"   # 触发压缩的字符数阈值
+      COMPRESS_KEEP_RECENT: "15"    # 保留最近几条消息
+    volumes:
+      - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
+    restart: unless-stopped
+    entrypoint: []
+    command:
+      - sh
+      - -c
+      - |
+        echo "[context-manager] started, checking every 30 minutes"
+        while true; do
+          python3 /home/node/.openclaw/scripts/compress-context.py
+          sleep 1800
+        done
+
   openclaw-cli:
     image: ${OPENCLAW_IMAGE:-openclaw:local}
     network_mode: "service:openclaw-gateway"
@@ -69,6 +92,8 @@ services:
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
+      WHISPER_CPP_MODEL: /home/node/dashscope-model.bin
+      PATH: /home/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     volumes:
       - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
       - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace

@@ -35,6 +35,14 @@ RUN if [ -n "$OPENCLAW_DOCKER_APT_PACKAGES" ]; then \
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3 - --break-system-packages --quiet && \
     pip install edge-tts --break-system-packages --quiet --root-user-action=ignore
 
+# Install DashScope ASR whisper-cli wrapper (mimics whisper-cli interface, routes to sensevoice-v1).
+# Also create a dummy model file so OpenClaw's whisper-cpp file-exists check passes.
+RUN mkdir -p /home/node/bin && \
+    touch /home/node/dashscope-model.bin && \
+    chown -R node:node /home/node/bin /home/node/dashscope-model.bin
+COPY --chown=node:node scripts/whisper-cli-dashscope.py /home/node/bin/whisper-cli
+RUN chmod +x /home/node/bin/whisper-cli
+
 COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY --chown=node:node ui/package.json ./ui/package.json
 COPY --chown=node:node packages/clawdbot/package.json ./packages/clawdbot/package.json
