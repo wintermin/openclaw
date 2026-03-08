@@ -82,7 +82,10 @@ RUN if [ -n "$OPENCLAW_INSTALL_BROWSER" ]; then \
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends chromium && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
-    npm install -g agent-browser@0.16.3 --registry https://registry.npmmirror.com
+    npm install -g agent-browser@0.16.3 --registry https://registry.npmmirror.com && \
+    mv /usr/local/bin/agent-browser /usr/local/bin/agent-browser-real
+COPY --chown=root:root scripts/agent-browser-wrapper.sh /usr/local/bin/agent-browser
+RUN chmod +x /usr/local/bin/agent-browser
 
 # Optionally install Docker CLI for sandbox container management.
 # Build with: docker build --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1 ...
