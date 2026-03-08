@@ -12,7 +12,7 @@ services:
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       WHISPER_CPP_MODEL: /home/node/dashscope-model.bin
-      PATH: /home/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      PATH: /home/node/.openclaw/bin:/home/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/chromium
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
       AGENT_BROWSER_EXECUTABLE_PATH: /usr/bin/chromium
@@ -98,11 +98,7 @@ services:
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       WHISPER_CPP_MODEL: /home/node/dashscope-model.bin
-      PATH: /home/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-    volumes:
-      - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
-      - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
-    stdin_open: true
+      PATH: /home/node/.openclaw/bin:/home/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     tty: true
     init: true
     entrypoint: ["node", "dist/index.js"]
