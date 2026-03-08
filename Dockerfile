@@ -78,11 +78,11 @@ RUN if [ -n "$OPENCLAW_INSTALL_BROWSER" ]; then \
 # Install agent-browser for AI-driven browser automation (always enabled).
 # Adds ~500MB but provides headless browser automation for AI agents.
 # Must run after pnpm install so playwright-core is available in node_modules.
-RUN npm install -g agent-browser@0.16.3 --registry https://registry.npmmirror.com && \
-    mkdir -p /home/node/.cache/ms-playwright && \
-    PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright \
-    node /app/node_modules/playwright-core/cli.js install --with-deps chromium && \
-    chown -R node:node /home/node/.cache
+# Uses system chromium (apt) instead of playwright download to avoid CDN issues in China.
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends chromium && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
+    npm install -g agent-browser@0.16.3 --registry https://registry.npmmirror.com
 
 # Optionally install Docker CLI for sandbox container management.
 # Build with: docker build --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1 ...

@@ -13,6 +13,8 @@ services:
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       WHISPER_CPP_MODEL: /home/node/dashscope-model.bin
       PATH: /home/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/chromium
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
     volumes:
       - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
       - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
