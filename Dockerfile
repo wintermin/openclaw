@@ -30,6 +30,11 @@ RUN if [ -n "$OPENCLAW_DOCKER_APT_PACKAGES" ]; then \
       rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*; \
     fi
 
+# Install edge-tts for TTS voice replies (free, no API key needed).
+# Uses Microsoft Edge's speech service; supports zh-CN voices out of the box.
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3 - --break-system-packages --quiet && \
+    pip install edge-tts --break-system-packages --quiet --root-user-action=ignore
+
 COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY --chown=node:node ui/package.json ./ui/package.json
 COPY --chown=node:node packages/clawdbot/package.json ./packages/clawdbot/package.json
