@@ -80,7 +80,7 @@ RUN if [ -n "$OPENCLAW_INSTALL_BROWSER" ]; then \
 # Must run after pnpm install so playwright-core is available in node_modules.
 # Uses system chromium (apt) instead of playwright download to avoid CDN issues in China.
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends chromium && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends chromium fonts-noto-cjk && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
     npm install -g agent-browser@0.16.3 --registry https://registry.npmmirror.com && \
     mv /usr/local/bin/agent-browser /usr/local/bin/agent-browser-real
