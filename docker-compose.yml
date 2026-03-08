@@ -17,6 +17,7 @@ services:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
       AGENT_BROWSER_EXECUTABLE_PATH: /usr/bin/chromium
       AGENT_BROWSER_ARGS: "--no-sandbox,--disable-dev-shm-usage"
+      XDG_RUNTIME_DIR: /home/node/.openclaw/media
     volumes:
       - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
       - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
